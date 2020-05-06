@@ -15,7 +15,6 @@ class FriendService extends StatefulWidget {
 class _FriendServiceState extends State<FriendService> {
   int count = 0;
   AddFriendDatabaseService add = new AddFriendDatabaseService();
-
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User>(context);
@@ -30,21 +29,20 @@ class _FriendServiceState extends State<FriendService> {
             count == 0 ?
             FlatButton.icon(onPressed: () {
               move(user.uid);
-            }, icon: Icon(Icons.arrow_forward), label: Text("SKIP"))
+            }, icon: Icon(Icons.arrow_forward,color: Colors.white,), label: Text("SKIP",style: TextStyle(color: Colors.white),))
                 : FlatButton.icon(onPressed: () {
               move(user.uid);
-            }, icon: Icon(Icons.arrow_forward), label: Text("NEXT"))
+            }, icon: Icon(Icons.arrow_forward,color: Colors.white,), label: Text("NEXT",style: TextStyle(color: Colors.white),))
           ],
         ),
         body: StreamBuilder(
             stream: Firestore.instance.collection('myUsers').snapshots(),
             builder: (context, ss) {
               if (!ss.hasData) {
-                return Loading();
+                return Temp(size: 40,);
               }
               else {
                 return ListView.builder(
-                  shrinkWrap: true,
                   itemCount: ss.data.documents.length,
                   itemBuilder: (context, i) {
                     return user.uid == ss.data.documents[i]['uid']
@@ -52,90 +50,85 @@ class _FriendServiceState extends State<FriendService> {
                         :
                     Padding(
                       padding: const EdgeInsets.all(10.0),
-                      child: ListTile(
-                        leading: ClipOval(
-                          child: CircleAvatar(
-                            radius: 25,
-                            backgroundColor: Colors.black,
-                            child: CachedNetworkImage(
-                              fit: BoxFit.cover,
-                              imageUrl: ss.data.documents[i]['profilepic'],
-                              placeholder: (context, url) {
-                                return CircleAvatar(
-                                  backgroundColor: Colors.black,
-                                  backgroundImage: AssetImage(
-                                      'images/defaultavatar.jpg'),
-                                );
-                              },
-                              errorWidget: (context, url, error) {
-                                return Icon(Icons.error);
-                              },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                      ClipOval(
+                      child: CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Colors.black,
+                        child: CachedNetworkImage(
+                          fit: BoxFit.cover,
+                          imageUrl: ss.data.documents[i]['profilepic'],
+                          placeholder: (context, url) {
+                            return CircleAvatar(
+                              backgroundColor: Colors.black,
+                              backgroundImage: AssetImage(
+                                  'images/defaultavatar.jpg'),
+                            );
+                          },
+                          errorWidget: (context, url, error) {
+                            return Icon(Icons.error);
+                          },
 
-                            ),
-                          ),
                         ),
-                        title: Text(ss.data.documents[i]['username'],
-                          style: TextStyle(fontWeight: FontWeight.bold),),
-                        trailing:StreamBuilder(
+                      ),),
+                          Text(ss.data.documents[i]['username'],
+                            style: TextStyle(fontWeight: FontWeight.bold),),
+                          StreamBuilder(
                               stream: Firestore.instance.collection('Friends')
                                   .document(user.uid)
-                                  .collection('myFriends').document(
-                                  ss.data.documents[i]['uid'])
-                                  .snapshots()
-                              , builder: (context, cc) {
-                              print(cc.data.exists);
-                              if(cc.data.exists)
-                                {
-                                  return IconButton(
+                                  .collection('myFriends').document(ss.data.documents[i]['uid'].toString()).snapshots(),
+                              builder: (context,cc)
+                              {
+
+                                return cc.hasData?(cc.data.exists?
+                                IconButton(
+                                  iconSize: 20.0,
+                                  icon: Icon(Icons.undo),
+                                  onPressed: (){
+
+                                    Firestore.instance.collection('Friends').document(user.uid).collection('myFriends').document(ss.data.documents[i]['uid']).delete().catchError((e){print(e.toString());});
+                                    setState(() {
+                                      --count;
+                                    });
+                                    Scaffold.of(context).showSnackBar(SnackBar(content: Text("USER REMOVED")
+                                      ,)
+                                    );},
+                                  color: Colors.black,
+                                )
+                                    :
+                                IconButton(
                                     iconSize: 20.0,
-                                    icon: Icon(Icons.undo),
+                                    icon: Icon(Icons.person_add),
                                     onPressed: (){
 
-                                      Firestore.instance.collection('Friends').document(user.uid).collection('myFriends').document(ss.data.documents[i]['uid']).delete().catchError((e){print(e.toString());});
-                                setState(() {
-                                --count;
-                                });
-                                      Scaffold.of(context).showSnackBar(SnackBar(content: Text("USER REMOVED")
-                                                          ,)
-                                                        );},
-                                    color: Colors.black,
-                                  );
-                                }
-                              else
-                                {
-                                    return IconButton(
-                                      iconSize: 20.0,
-                                      icon: Icon(Icons.person_add),
-                                      onPressed: (){
+                                      add.addFriend(user.uid,ss.data.documents[i]['uid']);
+                                      setState(() {
+                                        ++count;
+                                      });
+                                      Scaffold.of(context).showSnackBar(
+                                          SnackBar(content: Text("USER ADDED AS FRIEND")
+                                              ,action: SnackBarAction(
+                                                label: "UNDO",
+                                                onPressed: ()  {
+                                                  Firestore.instance.collection('Friends').document(user.uid).collection('myFriends').document(ss.data.documents[i]['uid']).delete().catchError((e){print(e.toString());});
+                                                  setState(() {
+                                                    --count;
+                                                  });
 
-                                        add.addFriend(user.uid, ss.data.documents[i]['uid']);
-                  setState(() {
-                          ++count;
-                  });
-                  Scaffold.of(context).showSnackBar(
-                                SnackBar(content: Text("USER ADDED AS FRIEND")
-                                ,action: SnackBarAction(
-                                label: "UNDO",
-                              onPressed: ()  {
-                                Firestore.instance.collection('Friends').document(user.uid).collection('myFriends').document(ss.data.documents[i]['uid']).delete().catchError((e){print(e.toString());});
-                                setState(() {
-                                  --count;
-                                });
+                                                },
 
-                                      },
+                                              )
+                                          )
+                                      );
 
-                                    )
-                                )
-                                );
-
-                                }
-                                );
                                     }
+                                )):CircularProgressIndicator(strokeWidth: 2,);
                               }
-                            ),
-
-
-                        ),
+                          )
+                        ],
+                      )
                     );
                   },
                 );
@@ -146,7 +139,6 @@ class _FriendServiceState extends State<FriendService> {
 
     );
   }
-
   move(String uid) {
     AddFriendDatabaseService(uid: uid).updateStatus('Done');
     return MainScreen();

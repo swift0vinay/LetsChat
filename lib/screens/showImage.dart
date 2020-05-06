@@ -1,66 +1,43 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 class ShowImage extends StatefulWidget {
+  final String hash;
   final String url;
-  ShowImage(  {this.url});
+  final String name;
+  ShowImage(  {this.hash,this.url,this.name});
   @override
   _ShowImageState createState() => _ShowImageState(
     url:url,
+    hash:hash,
+    name: name
   );
 }
 
 class _ShowImageState extends State<ShowImage> {
   final String url;
-  var regexExp=new RegExp('%2FI(.*?)\?alt');
-  String filename='';
-  _ShowImageState( {this.url}     );
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    print(url);
-    String ss;
-    Iterable matches = regexExp.allMatches(url);
-    matches.forEach((match) {
-      ss=url.substring(match.start, match.end);
-      print(url.substring(match.start, match.end));
-    });
-    String z=ss.substring(3,ss.length-4);
-    print(z);
-    setState(() {
-      filename=z;
-    });
-  }
+  final String hash;
+  final String name;
+  _ShowImageState( {this.hash,this.url,this.name}     );
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(icon: Icon(Icons.arrow_back,color: Colors.white,),onPressed: (){Navigator.pop(context);},),
         backgroundColor: Theme.of(context).primaryColor,
-        title: Text(filename,style: TextStyle(color: Colors.white),),
+        title: Text(name,style: TextStyle(color: Colors.white),),
       ),
-      body: Container(
+      body:  Hero(
+      tag: hash,
+     child: Container(
        width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         child: PhotoView(
-          loadingBuilder: (context,event){
-            return Center(
-              child: Container(
-                width: 50,
-                height: 50,
-                child: CircularProgressIndicator(
-                  backgroundColor: Colors.blueGrey,
-                  strokeWidth: 3,
-                  value: event == null
-                      ? 0
-                      : event.cumulativeBytesLoaded / event.expectedTotalBytes,
-                ),
-              ),
-            );
-          },
-          imageProvider: NetworkImage(url),
-                      ),
+            backgroundDecoration: BoxDecoration(
+              color: Colors.white
+            ),
+            imageProvider: NetworkImage(url),
+                        ),
+        ),
       ),
     );
   }

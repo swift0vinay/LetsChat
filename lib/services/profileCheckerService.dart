@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:letschat/databaseService/addFriendDatabaseService.dart';
 import 'package:letschat/friendService/addFriendServiced.dart';
 import 'package:letschat/screens/creatingProfile.dart';
+import 'package:letschat/screens/loadingScreen.dart';
 import 'package:letschat/screens/maintabscreen.dart';
 import 'package:letschat/services/usermodel.dart';
 
@@ -46,8 +47,7 @@ class _ProfileCheckerServiceState extends State<ProfileCheckerService> {
                 }
                 else
                 {
-                  return Container(
-                  );
+                  return Temp(size: 40,);
                 }
               }
 
@@ -55,8 +55,7 @@ class _ProfileCheckerServiceState extends State<ProfileCheckerService> {
           }
         }
         else {
-          return Container(
-           );
+          return Temp(size: 40,);
         }
       },
     );

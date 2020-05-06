@@ -24,7 +24,7 @@ class _SignInState extends State<SignIn> {
   @override
   Widget build(BuildContext context) {
 
-    return loading?Loading():SafeArea(
+    return loading?Temp(size: 40,):SafeArea(
       child: Scaffold(
           backgroundColor:Color(0xffFFB74D),
           body: Form(
@@ -36,7 +36,7 @@ class _SignInState extends State<SignIn> {
                   child: Container(
                     width: MediaQuery.of(context).size.width,
                     height: 300,
-                    color:Color(0xffFF9800)
+                    color:Theme.of(context).accentColor
                     ,child: Center(child: Text("Login",style: TextStyle(fontSize: 50,color: Colors.white
                       ,fontWeight: FontWeight.bold),)),
                   ),

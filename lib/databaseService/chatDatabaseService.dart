@@ -7,8 +7,54 @@ class ChatDatabaseService{
   final CollectionReference _chatDatabase=Firestore.instance
                                                       .collection('myChats');
 
+  Future addInitialState(String uid,String fid) async {
+    try{
+      return await _chatDatabase.document(uniqueId).setData(
+          {
+            uid:false,
+            fid:false,
+          }
+      );
+    }
+    catch(e){}
+}
+  Future addTypingUser(String uid,bool state) async {
+    try{
+      return await _chatDatabase.document(uniqueId).updateData(
+          {
+            uid:state,
+          }
+      );
+    }
+    catch(e){
+      print(e.toString());
+      return null;
+    }
+  }
 
-  Future userSendChat(String uid,String fid,String msg,String ms,Timestamp date,int type) async {
+  Future sendCard(String myId, String fid, String ms, Timestamp date, int type,bool state,String content,int imageIndex)
+  async {
+    try{
+      return await _chatDatabase.document(uniqueId).collection('Messages').document(ms).setData(
+          {
+            'fromId':myId,
+            'toId':fid,
+            'date':date,
+            'content':content,
+            'type':type,
+            'seen':state,
+            'notify':false,
+            'imageIndex':imageIndex,
+          }
+      );
+    }
+    catch(e){
+      print(e.toString());
+      return null;
+    }
+  }
+
+  Future userSendChat(String uid,String fid,String msg,String ms,Timestamp date,int type,bool state) async {
     try{
       return await _chatDatabase.document(uniqueId).collection('Messages').document(ms).setData(
           {
@@ -17,6 +63,8 @@ class ChatDatabaseService{
             'date':date,
             'userSentmsg':msg,
             'type':type,
+            'seen':state,
+            'notify':false,
           }
       );
     }
@@ -25,6 +73,39 @@ class ChatDatabaseService{
       return null;
     }
     }
+
+  Future updateSeen(String ms,bool state) async {
+    try{
+      return await _chatDatabase.document(uniqueId).collection('Messages').document(ms).updateData(
+          {
+            'seen':state
+          }
+      );
+    }
+    catch(e){
+      print(e.toString());
+      return null;
+    }
+  }
+
+  Future userSendImage(String uid,String fid,String msg,String ms,Timestamp date,int type,String filename) async {
+    try{
+      return await _chatDatabase.document(uniqueId).collection('Messages').document(ms).setData(
+          {
+            'fromId':uid,
+            'toId':fid,
+            'date':date,
+            'userSentmsg':msg,
+            'type':type,
+            'filename':filename,
+          }
+      );
+    }
+    catch(e){
+      print(e.toString());
+      return null;
+    }
+  }
   Future userSendFile(String uid,String fid,String msg,String ms,Timestamp date,int type,String filename,String state) async {
     try{
       return await _chatDatabase.document(uniqueId).collection('Messages').document(ms).setData(
@@ -36,6 +117,7 @@ class ChatDatabaseService{
             'type':type,
             'uploadstarted':false,
             'uploadcompleted':false,
+            'stop':false,
             'filename':filename,
             'downloaded':state,
             'start':false,
@@ -57,6 +139,8 @@ class ChatDatabaseService{
             'userSentmsg':msg,
             'uploadstarted':FieldValue.delete(),
             'uploadcompleted':FieldValue.delete(),
+            'stop':FieldValue.delete(),
+            'seen':false,
            }
       );
     }
@@ -162,5 +246,61 @@ class ChatDatabaseService{
       print(e.toString());
     }
   }
+
+  Future uploadRestart(String ms) async {
+    try{
+      return  await _chatDatabase.document(uniqueId).collection('Messages').document(ms).updateData(
+          {
+            'downloaded':'NO',
+            'start':false,
+            'isdownloading':false,
+            'isdownloaded':false
+          }
+      );
+    }
+    catch(e){
+      print(e.toString());
+    }
+  }
+  Future stopUpload(String ms,bool state) async{
+  try  {
+  return await _chatDatabase.document(uniqueId).collection('Messages').document(ms).updateData(
+  {
+  'stop':state,
+  }
+  );
+  }
+  catch(e){
+  print(e.toString());
+  }}
+  Future updateNotify(String ms) async {
+    try{
+      return await _chatDatabase.document(uniqueId).collection('Messages').document(ms).updateData(
+          {
+            'notify':null,
+          }
+      );
+    }
+    catch(e){
+      print(e.toString());
+    }
+  }
+
+  Future allUploadUpdate(String ms) async {
+    try{
+      return await _chatDatabase.document(uniqueId).collection('Messages').document(ms).updateData(
+          {
+            'userSentmsg':'PAUSED',
+            'uploadstarted':true,
+            'uploadcompleted':false,
+            'stop':true,
+          }
+      );
+    }
+    catch(e){
+      print(e.toString());
+    }
+  }
+
 
 }

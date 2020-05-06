@@ -25,7 +25,7 @@ class _RegisterState extends State<Register> {
   @override
   Widget build(BuildContext context) {
 
-    return  loading?Loading():SafeArea(
+    return  loading?Temp(size: 40,):SafeArea(
       child: Scaffold(
           backgroundColor:Theme.of(context).accentColor,
           body: Form(

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:letschat/databaseService/databaseService.dart';
 import 'package:letschat/friendService/addFriendServiced.dart';
-import 'package:letschat/screens/chatscreen.dart';
+import 'package:letschat/groupService/createGroup.dart';
 import 'package:letschat/screens/myProfile.dart';
+import 'package:letschat/screens/navScreen.dart';
 import 'package:letschat/screens/openCamera.dart';
 import 'package:letschat/services/authService.dart';
 import 'package:letschat/services/usermodel.dart';
 import 'package:letschat/storymode/storyscreen.dart';
 import 'package:provider/provider.dart';
+
 class MainScreen extends StatefulWidget {
   @override
   _MainScreenState createState() => _MainScreenState();
@@ -69,36 +71,102 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver,Sin
         }
     }
   }
+  Widget dropdownWidget(BuildContext context) {
+    return  PopupMenuButton<int>(
+      onSelected: (x){
+        switch(x){
+          case 0:{
+            Navigator.push(context, MaterialPageRoute(
+                builder: (context){
+                  return FriendService();
+                }
+            ));
+          }
+          break;
+          case 1:{
+            Navigator.push(context, MaterialPageRoute(
+                builder: (context){
+                  return CreateGroup();
+                }
+            ));
+          }
+            break;
+          case 2:{
+            Navigator.push(context, MaterialPageRoute(
+                builder: (context){
+                  return MyProfile();
+                }
+            ));
+          }
+          break;
+          case 3:{
+            var rs=_auth.signOut();
+             }
+        break;
+
+        }
+      },
+      offset: Offset(0,100),
+      itemBuilder:(context)=>[
+        PopupMenuItem(
+          value: 0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Text("Add Friends"),
+              Icon(Icons.person_add,color: Colors.black),
+            ],
+          )
+        ),
+        PopupMenuItem(
+          value: 1,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text("Create Group"),
+                Icon(Icons.people,color: Colors.black),
+              ],
+            )
+        ),
+        PopupMenuItem(
+          value: 2,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text("Check Profile"),
+                Icon(Icons.account_circle,color: Colors.black),
+              ],
+            )
+        ),
+        PopupMenuItem(
+          value: 3,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text("Log Out"),
+                Icon(Icons.power_settings_new,color: Colors.black),
+              ],
+            )
+
+        )
+      ] ,
+      icon: Icon(Icons.more_vert,color: Colors.white,),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     print(ts);
     final user=Provider.of<User>(context);
     DatabaseService(uid:user.uid).userUpdateStatus(ts);
     return Scaffold(
-       appBar: AppBar(
+       appBar:
+
+       AppBar(
         backgroundColor: Theme.of(context).primaryColor,
         actions: <Widget>[
-          IconButton(icon:Icon(Icons.more_vert,color: Colors.white,size: 30,)
-            ,onPressed: (){
-              Navigator.push(context, MaterialPageRoute(
-                  builder: (context){
-                    return MyProfile();
-                  }
-              ));
-            },
-          ),
-          IconButton(icon: Icon(Icons.power_settings_new,color: Colors.white,size: 30,),
-            onPressed: (){
-              var rs=_auth.signOut();
-            },),
-          IconButton(icon: Icon(Icons.person_add,color: Colors.white,size: 30,),
-            onPressed:(){ Navigator.push(context, MaterialPageRoute(
-                builder: (context){
-                  return FriendService();
-                }
-            ));})
+          dropdownWidget(context),
         ],
-        title: Text("HOLA CHAT"),
+        title: Text("LETS CHAT"),
         bottom: TabBar(
           controller: _tc,
           isScrollable: true,
@@ -117,7 +185,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver,Sin
           controller: _tc,
           children: <Widget>[
             OpenCamera(),
-            ChatScreen(),
+            NavScreen(ts:ts),
             StoryScreen(),
           ],
         ),
